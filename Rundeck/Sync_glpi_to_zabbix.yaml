@@ -1,1 +1,60 @@
-111
+- defaultTab: nodes
+  description: ''
+  executionEnabled: true
+  id: e98618da-561e-47a2-a36e-27dcd95f7a20
+  loglevel: INFO
+  name: Sync glpi to zabbix
+  nodeFilterEditable: false
+  plugins:
+    ExecutionLifecycle: {}
+  schedule:
+    month: '*'
+    time:
+      hour: 7-20
+      minute: '0,15,30,45'
+      seconds: '0'
+    weekday:
+      day: MON-FRI
+    year: '*'
+  scheduleEnabled: true
+  sequence:
+    commands:
+    - autoSecureInput: 'false'
+      passSecureInput: 'false'
+      script: |-
+        INTERPRETE="python3 "
+        PERCORSO=/opt/lexa/glpi-to-mariadb/
+        INSERT=glpi_to_lexa_insert.py
+        UPDATE=glpi_to_lexa_update.py
+        DELETE=glpi_to_lexa_delete.py
+        cd $PERCORSO
+        $INTERPRETE$DELETE
+        $INTERPRETE$INSERT
+        $INTERPRETE$UPDATE
+    - script: |-
+        INTERPRETE="python3 "
+        PERCORSO=/opt/lexa/mariadb-to-zabbix/
+        INSERT=mariadb_to_zabbix_insert.py
+        UPDATE=mariadb_to_zabbix_update.py
+        DELETE=mariadb_to_zabbix_delete.py
+        CHECK=integrity_check.py
+        cd $PERCORSO
+        $INTERPRETE$CHECK 3
+        $INTERPRETE$DELETE
+        $INTERPRETE$CHECK 1
+        $INTERPRETE$INSERT
+        $INTERPRETE$CHECK 2
+        $INTERPRETE$UPDATE
+    - autoSecureInput: 'false'
+      passSecureInput: 'false'
+      script: |-
+        INTERPRETE="python3 "
+        PERCORSO=/opt/lexa/glpi-to-mariadb/
+        ALIGN=align.py
+        LEXAFIELDS=lexafield.py
+        cd $PERCORSO
+        $INTERPRETE$ALIGN
+        $INTERPRETE$LEXAFIELDS
+    keepgoing: false
+    strategy: node-first
+  uuid: e98618da-561e-47a2-a36e-27dcd95f7a20
